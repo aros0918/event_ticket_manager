@@ -1,0 +1,4 @@
+/* Custom css */
+.VueCarousel-wrapper {
+    max-height: 85vh !important;
+}
