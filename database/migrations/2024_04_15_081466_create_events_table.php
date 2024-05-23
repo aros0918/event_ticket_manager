@@ -32,6 +32,10 @@ class CreateEventsTable extends Migration
 			$table->date('end_date')->nullable();
 			$table->time('start_time')->nullable();
 			$table->time('end_time')->nullable();
+			$table->integer('interval_time')->nullable();
+
+			$table->integer('disable_date')->nullable();
+
 			$table->boolean('status')->nullable()->default(1);
 			$table->string('meta_title', 256)->nullable();
 			$table->string('meta_keywords', 512)->nullable();

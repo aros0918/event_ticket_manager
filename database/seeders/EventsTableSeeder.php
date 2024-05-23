@@ -36,6 +36,8 @@ class EventsTableSeeder extends Seeder
                 'start_time' => '08:00:00',
                 'end_time' => '10:30:00',
                 'status' => 1,
+                'interval_time' => 15,
+                'disable_date' => 0,
                 'meta_title' => NULL,
                 'meta_keywords' => NULL,
                 'meta_description' => NULL,

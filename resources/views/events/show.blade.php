@@ -82,7 +82,7 @@
                                     <div class="col-xl-12 col-md-12 col-12">
                                         <div class="row">
                                             <div class="col-12">
-                                            
+                                             
                                                 <select-dates :event="{{ json_encode($event, JSON_HEX_APOS) }}"
                                                     :max_ticket_qty="{{ json_encode($max_ticket_qty, JSON_HEX_APOS) }}"
                                                     :login_user_id="{{ json_encode(\Auth::id(), JSON_HEX_APOS) }}"

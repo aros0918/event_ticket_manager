@@ -19,6 +19,10 @@ class CreateBookingsTable extends Migration {
 			$table->integer('customer_id')->unsigned();
 			$table->integer('event_id')->unsigned();
 			$table->integer('quantity')->unsigned();
+			$table->integer('quantity_general')->unsigned();
+
+			$table->integer('quantity_vip')->unsigned();
+
 			$table->decimal('price', 10)->unsigned();
 			$table->decimal('net_price', 10)->nullable();
 			$table->boolean('status')->default(0);
