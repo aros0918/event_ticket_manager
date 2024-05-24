@@ -145,7 +145,7 @@
                                         <i class="fas fa-ticket"></i>
                                         {{ booking.event_title }}
                                         <strong>{{
-                                            " x " + booking.quantity
+                                            " x " + booking.quantity_general + "(" + booking.quantity_vip + ")"
                                         }}</strong>
                                     </td>
                                     <td

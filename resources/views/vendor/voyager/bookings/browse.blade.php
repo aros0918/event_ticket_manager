@@ -1,11 +1,14 @@
 @extends('voyager::master')
 
-@section('page_title', __('voyager::generic.viewing').' '.$dataType->getTranslatedAttribute('display_name_plural'))
+<!-- @section('page_title', __('voyager::generic.viewing').' '.$dataType->getTranslatedAttribute('display_name_plural')) -->
+@section('page_title', __('voyager::generic.viewing').' '.'Validate')
 
 @section('page_header')
     <div class="container-fluid">
         <h1 class="page-title">
-            <i class="{{ $dataType->icon }}"></i> {{ $dataType->getTranslatedAttribute('display_name_plural') }}
+            <!-- <i class="{{ $dataType->icon }}"></i> {{ $dataType->getTranslatedAttribute('display_name_plural') }} -->
+            <i class="{{ $dataType->icon }}"></i> {{ 'Validate' }}
+
         </h1>
         
         @include('voyager::multilingual.language-selector')
@@ -24,6 +27,8 @@
                                 <div id="search-input">
                                     <div class="col-2">
                                         <select id="search_key" name="key">
+                                            <option value="qr_code" @if($search->key == 'qr_code'){{ 'selected' }}@endif>QR Code</option>
+        
                                             @foreach($searchNames as $key => $name)
                                                 <option value="{{ $key }}" @if($search->key == $key || (empty($search->key) && $key == $defaultSearchKey)){{ 'selected' }}@endif>{{ $name }}</option>
                                             @endforeach
@@ -280,6 +285,24 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="qrScannerModal" tabindex="-1" role="dialog" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrScannerModalLabel">Scan QR Code</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <video id="qrScannerVideo" width="100%"></video>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('css')
@@ -293,6 +316,35 @@
     @if(!$dataType->server_side && config('dashboard.data_tables.responsive'))
         <script src="{{ voyager_asset('lib/js/dataTables.responsive.min.js') }}"></script>
     @endif
+    <script>
+    $(document).ready(function() {
+        var scanner = new Instascan.Scanner({ video: document.getElementById('qrScannerVideo') });
+        // scanner.addListener('scan', function (content) {
+        //     alert('QR Code scanned: ' + content);
+        //     $('#qrScannerModal').modal('hide');
+        // });
+
+        $('#search_key').change(function() {
+            if ($(this).val() === 'qr_code') {
+                $('#qrScannerModal').modal('show');
+                Instascan.Camera.getCameras().then(function (cameras) {
+                    if (cameras.length > 0) {
+                        scanner.start(cameras[0]);
+                    } else {
+                        console.error('No cameras found.');
+                    }
+                }).catch(function (e) {
+                    console.error(e);
+                });
+            }
+        });
+
+        $('#qrScannerModal').on('hidden.bs.modal', function () {
+            scanner.stop();
+        });
+    });
+    </script>
+
     <script>
         $(document).ready(function () {
             @if (!$dataType->server_side)
@@ -360,4 +412,5 @@
             $('.selected_ids').val(ids);
         });
     </script>
+
 @stop

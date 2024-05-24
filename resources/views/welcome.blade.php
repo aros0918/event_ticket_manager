@@ -234,6 +234,8 @@ $perPage = 3;
 
 @section('javascript')
 <script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/instascan/1.0.0/instascan.min.js"></script>
+
 <script type="text/javascript">
     var events_slider = true;
 </script>

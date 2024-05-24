@@ -36,7 +36,7 @@ class MenuItemsTableSeeder extends Seeder
         }
 
         // Bookings
-        $menuItem = MenuItem::firstOrNew(["menu_id" => $menu->id, "title" => "Bookings", "url" => "", "route" => "voyager.bookings.index", ]);
+        $menuItem = MenuItem::firstOrNew(["menu_id" => $menu->id, "title" => "Validate", "url" => "", "route" => "voyager.bookings.index", ]);
         if (!$menuItem->exists) {
             $menuItem->fill(["target" => "_self", "icon_class" => "voyager-dollar", "color" => "", "parent_id" => null, "order" => "5", ])->save();
         }

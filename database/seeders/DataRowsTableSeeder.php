@@ -1698,6 +1698,38 @@ class DataRowsTableSeeder extends Seeder
                     'details' => '{}',
                     'order' => 20,
                 ),
+                105 => 
+                array (
+                    'id' => 287,
+                    'data_type_id' => 27,
+                    'field' => 'quantity_general',
+                    'type' => 'text',
+                    'display_name' => 'General Tickets',
+                    'required' => 1,
+                    'browse' => 1,
+                    'read' => 1,
+                    'edit' => 0,
+                    'add' => 0,
+                    'delete' => 0,
+                    'details' => '{}',
+                    'order' => 12,
+                ),
+                106 => 
+                array (
+                    'id' => 288,
+                    'data_type_id' => 27,
+                    'field' => 'quantity_vip',
+                    'type' => 'text',
+                    'display_name' => 'VIP Tickets',
+                    'required' => 1,
+                    'browse' => 1,
+                    'read' => 1,
+                    'edit' => 0,
+                    'add' => 0,
+                    'delete' => 0,
+                    'details' => '{}',
+                    'order' => 12,
+                ),
             ));
         }
         

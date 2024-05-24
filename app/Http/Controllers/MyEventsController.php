@@ -334,25 +334,27 @@ class MyEventsController extends Controller
 
         // $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
         // $endpoint_secret = env('STRIPE_WEBHOOK_KEY');
-        $stripe = new \Stripe\StripeClient('sk_test_51PEPW8ITkovMOcdYwPtOxu7X0NXTsE7Vmr4K6eB6OTuBQeEgllJShgM3XnKb1e6yItJBGaZe4ORiLrLaPhlMfhgI00Q9L9Duhj');
-        $endpoint_secret = 'whsec_bed8bd70a27de256ea8e6d27398d53f4f85d02d70d7b21c823bd464490c1fd42';
+        $stripe = new \Stripe\StripeClient(getenv('STRIPE_SECRET_KEY'));
+        $endpoint_secret = getenv('STRIPE_WEBHOOK_KEY');
 
         $payload = @file_get_contents('php://input');
         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
         $webhookevent = null;
-        
+
         try {
             $webhookevent = \Stripe\Webhook::constructEvent(
-                $payload, $sig_header, $endpoint_secret
+                $payload,
+                $sig_header,
+                $endpoint_secret
             );
-        } catch(\UnexpectedValueException $e) {
+        } catch (\UnexpectedValueException $e) {
             http_response_code(400);
-            exit(); 
-        } catch(\Stripe\Exception\SignatureVerificationException $e) {
+            exit();
+        } catch (\Stripe\Exception\SignatureVerificationException $e) {
             http_response_code(400);
             exit();
         }
-        
+
         // Handle the event
         switch ($webhookevent->type) {
             case 'checkout.session.completed':
@@ -363,7 +365,7 @@ class MyEventsController extends Controller
 
                 // Parse the query string into an associative array
                 parse_str($queryParams, $params);
-                
+
                 // Create a new request instance with the extracted parameters
                 $pay_request = new Request([
                     'event_id' => $params['event_id'] ?? null,
@@ -373,6 +375,10 @@ class MyEventsController extends Controller
                     'quantity_vip' => $params['quantity_vip'] ?? 0,
                     'price' => $params['price'] ?? 0,
                 ]);
+                $quantity_vip = $params['quantity_vip'] ?? null;
+                $quantity_general = $params['quantity_general'] ?? null;
+                $booking_time = $params['booking_time'] ?? null;
+
 
                 $order_number = $this->book_tickets($pay_request);
                 $startPos = strpos($order_number, '{');
@@ -381,44 +387,53 @@ class MyEventsController extends Controller
                 if ($data && isset($data['order_number'], $data['customer_email'])) {
                     $orderNumber = $data['order_number'];
                     $customerEmail = $data['customer_email'];
-                } 
-                
+                }
+
                 $email = new \SendGrid\Mail\Mail();
                 $email->setFrom("contacto@immmu.mx", "IMMMU");
                 $email->setSubject("Confirmación de compra en Fever: IMMMU");
-                // $qrCodeDataUri = 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(200)->generate($orderNumber));
-                // $qrCodes = [];
-                // $qrCodes['simple'] = 
-                // QrCode::size(150)->generate('https://minhazulmin.github.io/');
-                // $qrCodes['changeColor'] = 
-                // QrCode::size(150)->color(255, 0, 0)->generate('https://minhazulmin.github.io/');
-                // $qrCodes['changeBgColor'] = 
-                // QrCode::size(150)->backgroundColor(255, 0, 0)->generate('https://minhazulmin.github.io/');
-                // $qrCodes['styleDot'] = 
-                // QrCode::size(150)->style('dot')->generate('https://minhazulmin.github.io/');
-                // $qrCodes['styleSquare'] = QrCode::size(150)->style('square')->generate('https://minhazulmin.github.io/');
-                // $qrCodes['styleRound'] = QrCode::size(150)->style('round')->generate('https://minhazulmin.github.io/');
-                $qrCodes = [
-                    'simple' => 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(150)->generate('https://minhazulmin.github.io/')),
-                    'changeColor' => 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(150)->color(255, 0, 0)->generate('https://minhazulmin.github.io/')),
-                    'changeBgColor' => 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(150)->backgroundColor(255, 0, 0)->generate('https://minhazulmin.github.io/')),
-                    'styleDot' => 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(150)->style('dot')->generate('https://minhazulmin.github.io/')),
-                    'styleSquare' => 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(150)->style('square')->generate('https://minhazulmin.github.io/')),
-                    'styleRound' => 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(150)->style('round')->generate('https://minhazulmin.github.io/')),
-                ];
-                // $viewData = [
-                //     'order_number' => $orderNumber,
-                //     'customer_email' => $customerEmail,
-                //     'qr_code' => $qrCodes,
+                $imageKit = new \ImageKit\ImageKit(
+                    "public_SzSRyG4JH2wW/r4akI/x/NSjMbM=",
+                    "private_H8tI/uvVQ+UjA1tIi2Ld+NqceL0=",
+                    "https://ik.imagekit.io/g5kjmqmav"
 
-                // ];
+                );
+
+                $qrCodeData = base64_encode(QrCode::format('png')->size(150)->generate($orderNumber));
+                $uploadFile = $imageKit->uploadFile([
+                    'file' => $qrCodeData,
+                    'fileName' => 'qr-code'
+                ]);
+
+                if (isset($uploadFile->result->url)) {
+                    $uploadedImageUrl = $uploadFile->result->url;
+                    $qrCodes = [
+                        'qr_code' => $uploadedImageUrl,
+                        'order_number' => $orderNumber,
+                        'customer_email' => $customerEmail,
+                        'quantity_vip' => $quantity_vip,
+                        'quantity_general'=> $quantity_general,
+                        'booking_time'=> $booking_time,
+                    ];
+                } else {
+                    $qrCodes = [
+                        'qr_code' => '',
+                        'order_number' => $orderNumber,
+                        'customer_email' => $customerEmail,
+                        'quantity_vip' => $quantity_vip,
+                        'quantity_general'=> $quantity_general,
+                        'booking_time'=> $booking_time,
+                    ];
+                }
+                $quantity_vip = $params['quantity_vip'] ?? null;
+                $quantity_general = $params['quantity_general'] ?? null;
+                $booking_time = $params['booking_time'] ?? null;
                 $htmlContent = view('emails.order', $qrCodes)->render();
-                
-                // $email->addTo($customerEmail, "customer");
-                $email->addTo('rarosdev@gmail.com', "customer");
+
+                $email->addTo($customerEmail, "customer");
 
                 $email->addContent("text/html", $htmlContent);
-                $sendgrid = new \SendGrid('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');
+                $sendgrid = new \SendGrid(getenv('SENDGRID_API_KEY'));
                 try {
                     $response = $sendgrid->send($email);
                     Log::info('Email sending now');
@@ -427,14 +442,14 @@ class MyEventsController extends Controller
                         'body' => $response->body(),
                         'headers' => $response->headers()
                     ];
-                    
+
                     Log::info("email send", $responseArray);
                     // Log::info("email send", $response->body());
 
                 } catch (Exception $e) {
-                    Log::error( 'Caught exception: '. $e->getMessage());
-                }   
-               
+                    Log::error('Caught exception: ' . $e->getMessage());
+                }
+
                 break;
 
             // case 'checkout.session.async_payment_success':
@@ -454,7 +469,7 @@ class MyEventsController extends Controller
                 break;
 
         }
-        
+
         http_response_code(200);
     }
     public function book_tickets(Request $request)
@@ -493,7 +508,7 @@ class MyEventsController extends Controller
         $booking['event_id'] = $data['event']['id'];
         $booking['quantity_general'] = $data['quantity_general'];
         $booking['quantity_vip'] = $data['quantity_vip'];
-        
+
         $booking['status'] = 1;
         $booking['created_at'] = Carbon::now();
         $booking['updated_at'] = Carbon::now();
@@ -524,8 +539,8 @@ class MyEventsController extends Controller
             'customer_email' => $booking['customer_email'],
         ]);
     }
-   
-    
+
+
     private function general_validation(Request $request)
     {
         $request->validate([
@@ -592,29 +607,32 @@ class MyEventsController extends Controller
         return true;
     }
 
-    
+
     /**
      * Payment
      */
     public function create_payment_intent(Request $request)
     {
         // Stripe::setApiKey('sk_test_4eC39HqLyjWDarjtT1zdp7dc');
-        Stripe::setApiKey('sk_test_51PEPW8ITkovMOcdYwPtOxu7X0NXTsE7Vmr4K6eB6OTuBQeEgllJShgM3XnKb1e6yItJBGaZe4ORiLrLaPhlMfhgI00Q9L9Duhj');
+        // Stripe::setApiKey('sk_test_51PEPW8ITkovMOcdYwPtOxu7X0NXTsE7Vmr4K6eB6OTuBQeEgllJShgM3XnKb1e6yItJBGaZe4ORiLrLaPhlMfhgI00Q9L9Duhj');
+        Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));
 
- 
+
         try {
 
             $checkout_session = Session::create([
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'MXN',
-                        'product_data' => [
-                            'name' => 'Tickets',
+                'line_items' => [
+                    [
+                        'price_data' => [
+                            'currency' => 'MXN',
+                            'product_data' => [
+                                'name' => 'Tickets',
+                            ],
+                            'unit_amount' => $request->price * 100,
                         ],
-                        'unit_amount' => $request->price * 100,
-                    ],
-                    'quantity' => 1,
-                ]],
+                        'quantity' => 1,
+                    ]
+                ],
                 'mode' => 'payment',
                 'success_url' => $request->success_url
             ]);
@@ -624,7 +642,7 @@ class MyEventsController extends Controller
         } catch (ErrorException $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
-     
+
     }
     /** 
      * Store Timings
@@ -648,7 +666,7 @@ class MyEventsController extends Controller
 
         $data = $single_event['data'];
 
-        
+
         $event_timing = $this->event->save_event($data, $request->event_id);
 
         if (empty($event_timing))
