@@ -334,8 +334,8 @@ class MyEventsController extends Controller
 
         // $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
         // $endpoint_secret = env('STRIPE_WEBHOOK_KEY');
-        $stripe = new \Stripe\StripeClient('sk_test_51PEPW8ITkovMOcdYwPtOxu7X0NXTsE7Vmr4K6eB6OTuBQeEgllJShgM3XnKb1e6yItJBGaZe4ORiLrLaPhlMfhgI00Q9L9Duhj');
-        $endpoint_secret = 'whsec_bed8bd70a27de256ea8e6d27398d53f4f85d02d70d7b21c823bd464490c1fd42';
+        $stripe = new \Stripe\StripeClient(getenv('STRIPE_SECRET_KEY'));
+        $endpoint_secret = getenv('STRIPE_WEBHOOK_KEY');
 
         $payload = @file_get_contents('php://input');
         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
@@ -433,7 +433,7 @@ class MyEventsController extends Controller
                 $email->addTo($customerEmail, "customer");
 
                 $email->addContent("text/html", $htmlContent);
-                $sendgrid = new \SendGrid('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');
+                $sendgrid = new \SendGrid(getenv('SENDGRID_API_KEY'));
                 try {
                     $response = $sendgrid->send($email);
                     Log::info('Email sending now');
@@ -614,7 +614,8 @@ class MyEventsController extends Controller
     public function create_payment_intent(Request $request)
     {
         // Stripe::setApiKey('sk_test_4eC39HqLyjWDarjtT1zdp7dc');
-        Stripe::setApiKey('sk_test_51PEPW8ITkovMOcdYwPtOxu7X0NXTsE7Vmr4K6eB6OTuBQeEgllJShgM3XnKb1e6yItJBGaZe4ORiLrLaPhlMfhgI00Q9L9Duhj');
+        // Stripe::setApiKey('sk_test_51PEPW8ITkovMOcdYwPtOxu7X0NXTsE7Vmr4K6eB6OTuBQeEgllJShgM3XnKb1e6yItJBGaZe4ORiLrLaPhlMfhgI00Q9L9Duhj');
+        Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));
 
 
         try {
