@@ -390,8 +390,8 @@ class MyEventsController extends Controller
                 }
 
                 $email = new \SendGrid\Mail\Mail();
-                $email->setFrom("contacto@immmu.mx", "IMMMU");
-                $email->setSubject("Confirmación de compra en Fever: IMMMU");
+                $email->setFrom("contacto@fugaz.com", "FUGAZ");
+                $email->setSubject("Confirmación de compra en Fever: FUGAZ");
                 $imageKit = new \ImageKit\ImageKit(
                     "public_SzSRyG4JH2wW/r4akI/x/NSjMbM=",
                     "private_H8tI/uvVQ+UjA1tIi2Ld+NqceL0=",
