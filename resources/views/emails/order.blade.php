@@ -1,4 +1,3 @@
-<!-- resources/views/emails/order.blade.php -->
 <!DOCTYPE html>
 <html>
 
@@ -53,6 +52,17 @@
             vertical-align: middle;
             margin-right: 8px;
         }
+        .download-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 10px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+        }
     </style>
 </head>
 
@@ -77,6 +87,8 @@
         <div class="qr-code">
             <p>Scan your QR Code: <?= $order_number ?></p>
             <img src="<?= $qr_code ?>" alt="QR Code">
+            <br>
+            <a href="<?= $qr_code ?>" download="fugaz_<?= $order_number ?>.png" class="download-btn">Download QR Code</a>
         </div>
     </div>
 </body>

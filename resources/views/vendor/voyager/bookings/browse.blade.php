@@ -28,9 +28,11 @@
                                     <div class="col-2">
                                         <select id="search_key" name="key">
         
-                                            @foreach($searchNames as $key => $name)
+                                            <!-- @foreach($searchNames as $key => $name)
                                                 <option value="{{ $key }}" @if($search->key == $key || (empty($search->key) && $key == $defaultSearchKey)){{ 'selected' }}@endif>{{ $name }}</option>
-                                            @endforeach
+                                            @endforeach -->
+                                            <option value="order_number" @if($search->key == 'order_number'){{ 'selected' }}@endif>Ticket ID</option>
+                                            <option value="customer_email" @if($search->key == 'customer_email'){{ 'selected' }}@endif>Email</option>
 
                                             <option value="qr_code" @if($search->key == 'qr_code'){{ 'selected' }}@endif>QR Code</option>
 
@@ -84,7 +86,7 @@
                                             @endif
                                         </th>
                                         @endforeach
-                                        <th> {{ __('em.expired') }} </th>
+                                        <!-- <th> {{ __('em.expired') }} </th> -->
                                         <th class="actions text-right">{{ __('voyager::generic.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -241,7 +243,7 @@
                                             </td>
                                         @endforeach
 
-                                        <td>
+                                        <!-- <td>
                                             
                                             {{
                                             
@@ -249,7 +251,7 @@
                                         
                                             }}
                                         
-                                        </td>
+                                        </td> -->
                                        
                                         <td class="no-sort no-click" id="bread-actions">
 
@@ -348,6 +350,10 @@
                         const code = jsQR(imageData.data, imageData.width, imageData.height);
                         if (code) {
                             $('#qrResult').text('QR Code Content: ' + code.data);
+                            $('input[name="s"]').val(code.data);
+                            $('#qrScannerModal').modal('hide');
+                            $('#search_key').val('order_number').trigger('change');
+                            $('.form-search').submit();
                         } else {
                             $('#qrResult').text('No QR code found.');
                         }
