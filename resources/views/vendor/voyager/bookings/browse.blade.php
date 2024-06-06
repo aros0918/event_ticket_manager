@@ -27,11 +27,13 @@
                                 <div id="search-input">
                                     <div class="col-2">
                                         <select id="search_key" name="key">
-                                            <option value="qr_code" @if($search->key == 'qr_code'){{ 'selected' }}@endif>QR Code</option>
         
                                             @foreach($searchNames as $key => $name)
                                                 <option value="{{ $key }}" @if($search->key == $key || (empty($search->key) && $key == $defaultSearchKey)){{ 'selected' }}@endif>{{ $name }}</option>
                                             @endforeach
+
+                                            <option value="qr_code" @if($search->key == 'qr_code'){{ 'selected' }}@endif>QR Code</option>
+
                                         </select>
                                     </div>
                                     <div class="col-2">
@@ -286,23 +288,26 @@
         </div>
     </div>
     <div class="modal fade" id="qrScannerModal" tabindex="-1" role="dialog" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="qrScannerModalLabel">Scan QR Code</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <video id="qrScannerVideo" width="100%"></video>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrScannerModalLabel">Scan QR Code</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="file" id="qrCodeInput" accept="image/*">
+                <canvas id="qrCanvas" style="display:none;"></canvas>
+                <div id="qrResult" style="margin-top:20px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
+
 @stop
 
 @section('css')
@@ -312,37 +317,48 @@
 @stop
 
 @section('javascript')
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
     <!-- DataTables -->
     @if(!$dataType->server_side && config('dashboard.data_tables.responsive'))
         <script src="{{ voyager_asset('lib/js/dataTables.responsive.min.js') }}"></script>
     @endif
     <script>
     $(document).ready(function() {
-        var scanner = new Instascan.Scanner({ video: document.getElementById('qrScannerVideo') });
-        // scanner.addListener('scan', function (content) {
-        //     alert('QR Code scanned: ' + content);
-        //     $('#qrScannerModal').modal('hide');
-        // });
-
         $('#search_key').change(function() {
             if ($(this).val() === 'qr_code') {
                 $('#qrScannerModal').modal('show');
-                Instascan.Camera.getCameras().then(function (cameras) {
-                    if (cameras.length > 0) {
-                        scanner.start(cameras[0]);
-                    } else {
-                        console.error('No cameras found.');
-                    }
-                }).catch(function (e) {
-                    console.error(e);
-                });
             }
         });
 
-        $('#qrScannerModal').on('hidden.bs.modal', function () {
-            scanner.stop();
+        $('#qrCodeInput').change(function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.getElementById('qrCanvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const code = jsQR(imageData.data, imageData.width, imageData.height);
+                        if (code) {
+                            $('#qrResult').text('QR Code Content: ' + code.data);
+                        } else {
+                            $('#qrResult').text('No QR code found.');
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
         });
     });
+
     </script>
 
     <script>
