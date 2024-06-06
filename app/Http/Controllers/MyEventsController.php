@@ -331,6 +331,7 @@ class MyEventsController extends Controller
      */
     public function handle_web_hook(Request $request)
     {
+        Log::info('Hello');
 
         // $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
         // $endpoint_secret = env('STRIPE_WEBHOOK_KEY');
