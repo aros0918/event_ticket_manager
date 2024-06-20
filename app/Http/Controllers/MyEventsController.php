@@ -510,7 +510,7 @@ class MyEventsController extends Controller
         $booking['quantity_general'] = $data['quantity_general'];
         $booking['quantity_vip'] = $data['quantity_vip'];
 
-        $booking['status'] = 1;
+        $booking['status'] = 0;
         $booking['created_at'] = Carbon::now();
         $booking['updated_at'] = Carbon::now();
         $booking['event_title'] = $data['event']['title'];

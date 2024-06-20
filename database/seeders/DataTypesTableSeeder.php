@@ -170,6 +170,25 @@ class DataTypesTableSeeder extends Seeder
             );
             \DB::table('data_types')->insert(
                 array(
+                    'id' => 27,
+                    'name' => 'attendees',
+                    'slug' => 'attendees',
+                    'display_name_singular' => 'Attendees',
+                    'display_name_plural' => 'Attendees',
+                    'icon' => 'voyager-person',
+                    'model_name' => 'App\\Models\\Booking',
+                    'policy_name' => NULL,
+                    'controller' => '\\App\\Http\\Controllers\\Voyager\\AttendeesController',
+                    'description' => NULL,
+                    'generate_permissions' => 1,
+                    'server_side' => 1,
+                    'details' => '{"order_column":null,"order_display_column":null,"order_direction":"asc","default_search_key":null,"scope":null}',
+                    'created_at' => '2019-08-17 05:29:55',
+                    'updated_at' => '2019-10-05 05:27:14',
+                )
+            );
+            \DB::table('data_types')->insert(
+                array(
                     'id' => 31,
                     'name' => 'banners',
                     'slug' => 'banners',
